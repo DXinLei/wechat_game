@@ -7,7 +7,7 @@
 feat/p0-mvp-bootstrap
 
 ## Latest Commit
-None (pending commit)
+2142cc1
 
 ## Task Received
 实现 P0 v0.1 可玩原型：3×3 合成玩法、点击式合成交互、完整游戏状态管理、棋盘初始化与掉落、通关/失败判断、基础按钮 UI。
