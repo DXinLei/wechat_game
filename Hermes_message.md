@@ -1,24 +1,23 @@
 # Hermes Message
 
 ## Last Updated
-2026-05-23 06:10:00
+2026-05-23 06:15:00
 
 ## Current Branch
 feat/p0-mvp-bootstrap
 
 ## Latest Commit
-2142cc1
+None (pending commit)
 
 ## Task Received
-实现 P0 v0.1 可玩原型：3×3 合成玩法、点击式合成交互、完整游戏状态管理、棋盘初始化与掉落、通关/失败判断、基础按钮 UI。
+修复 P0 v0.1 交互阻塞问题：游戏结束后按钮无法点击、绘制层级错误、下一关可在普通状态点击、微信触摸事件兼容性。
 
 ## Actions Taken
-- **重构 src/main.js**：实现完整游戏状态（currentLevelId、board、selectedCell、isGameOver、isWin、coins、attempts），初始化 storage/analytics/renderer，加载第 1 关，根据 initialCount 和 dropRates 生成恐龙，实现点击式合成交互（选源格 → 选目标格 → 合成 → 掉落 → 判断），绑定 Canvas 点击/触摸事件，暴露 `_handleClick` 供测试调用。
-- **扩展 src/ui/renderer.js**：新增 `drawGame(state)` 渲染完整游戏画面（背景、标题、关卡信息、3×3 棋盘+恐龙圆形占位+等级文字、选中格高亮、按钮区域、通关/失败提示、操作提示），新增 `hitTest(x,y)` 点击命中测试，新增动态布局计算 `_calcLayout()` 适配微信屏幕尺寸（`wx.getSystemInfoSync()`），非微信环境 fallback 到 375×667。
-- **补充 src/core/level.js**：新增 `isTargetReached(board, target)` 判断通关、新增 `restartLevel()` 重开当前关。
-- **更新 scripts/smoke-test.mjs**：新增 4 项轻量逻辑检查（Board.hasMergeable、Board.isStuck、levels.length===30、Level 1 target 配置）。
-- **修复 smoke test bug**：isStuck 测试用 9 个不同等级（Lv.1~9）替代重复等级数组，避免 hasMergeable 误判。
-- **执行 npm run check**：19/19 通过，无错误。
+- **修复 src/main.js 点击流程**：重写 `handleClick()`，先做 `hitTest()`，再处理按钮（restart 始终可用，next 仅在 `isGameOver && isWin` 时可用），游戏结束时棋盘格点击才 return，普通状态可正常点击棋盘。
+- **新增导出 canUseButton() 纯函数**：可独立测试按钮状态逻辑。
+- **修复 src/ui/renderer.js 绘制层级**：将遮罩/提示绘制移到按钮绘制之前，保证按钮始终最上层；`nextEnabled = isGameOver && isWin`，失败时下一关按钮正确禁用。
+- **修复微信触摸事件兼容性**：`bindCanvasEvents()` 优先使用 `wx.onTouchStart`，降级使用 `wx.onCanvasTouchStart`，浏览器环境同时支持 `touchstart` 和 `click`。
+- **更新 scripts/smoke-test.mjs**：新增 2 项 canUseButton 逻辑测试（restart 始终 true / next 仅通关可用 / unknown 返回 false），smoke test 总计 22/22 通过。
 
 ## Commands Run
 ```bash
@@ -41,15 +40,18 @@ npm run check
 # [smoke] ok: ../src/utils/random.js
 # [smoke] ok: ../src/utils/time.js
 # [smoke] ok: createGame is a function
+# [smoke] ok: canUseButton is a function
 # [logic] ok: Board.hasMergeable() true with two Lv.1 dinos
 # [logic] ok: Board.isStuck() true when full and no mergeable pairs
 # [logic] ok: levels.length === 30
 # [logic] ok: Level 1 target = Lv.2 × 1, initialCount = 3
-# [smoke] result: 19 passed, 0 failed
+# [logic] ok: canUseButton — restart always true, next only true when winning
+# [logic] ok: canUseButton unknown button returns false
+# [smoke] result: 22 passed, 0 failed
 ```
 
 ## Result
-✅ 完成。已实现 P0 v0.1 可玩原型：点击式 3×3 合成、完整游戏状态管理、掉落逻辑、通关/失败判断、drawGame 渲染、底部按钮 UI。npm run check 19/19 通过。
+✅ 完成。修复了 4 个交互问题：按钮点击被阻断、绘制层级错误、下一关可在任意状态点击、触摸事件不兼容。npm run check 22/22 通过。
 
 ## Errors / Blockers
 None。

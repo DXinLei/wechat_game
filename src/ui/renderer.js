@@ -299,17 +299,19 @@ export class Renderer {
     this.drawLevelInfo(levelId, levelCfg);
     this.drawBoard(board, selectedCell);
 
-    const { buttons } = this.layout;
-    // 按钮：重开始终可用，下一关仅通关后可用
-    this.drawButton('重 开', buttons.restart.x, buttons.restart.y,
-                    buttons.restart.w, buttons.restart.h, '#FF7043', false);
-    this.drawButton('下一关', buttons.next.x, buttons.next.y,
-                    buttons.next.w, buttons.next.h, '#66BB6A', !isGameOver);
-
     if (isGameOver) {
+      // 通关/失败遮罩先画（但按钮最后画，不被盖住）
       this.drawGameOver(isWin);
     } else {
       this.drawHint();
     }
+
+    // 按钮始终最后绘制，保证不被遮罩盖住
+    const { buttons } = this.layout;
+    const nextEnabled = isGameOver && isWin;
+    this.drawButton('重 开', buttons.restart.x, buttons.restart.y,
+                    buttons.restart.w, buttons.restart.h, '#FF7043', false);
+    this.drawButton('下一关', buttons.next.x, buttons.next.y,
+                    buttons.next.w, buttons.next.h, '#66BB6A', !nextEnabled);
   }
 }

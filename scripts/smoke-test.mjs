@@ -34,7 +34,7 @@ for (const modulePath of modules) {
   }
 }
 
-// 验证 main.js 导出 createGame
+// 验证 main.js 导出 createGame 和 canUseButton
 try {
   const main = await import('../src/main.js');
   if (typeof main.createGame !== 'function') {
@@ -42,8 +42,14 @@ try {
   }
   console.log('[smoke] ok: createGame is a function');
   passed++;
+
+  if (typeof main.canUseButton !== 'function') {
+    throw new Error('canUseButton export is missing or not a function');
+  }
+  console.log('[smoke] ok: canUseButton is a function');
+  passed++;
 } catch (err) {
-  console.error(`[smoke] FAIL: createGame check — ${err.message}`);
+  console.error(`[smoke] FAIL: createGame/canUseButton check — ${err.message}`);
   failed++;
 }
 
@@ -113,6 +119,50 @@ try {
   passed++;
 } catch (err) {
   console.error(`[logic] FAIL: Level 1 config — ${err.message}`);
+  failed++;
+}
+
+// 5. canUseButton() — restart always true, next respects winning state
+try {
+  const { canUseButton } = await import('../src/main.js');
+  // restart: always true regardless of game state
+  const allStates = [
+    { isGameOver: false, isWin: false },
+    { isGameOver: true, isWin: false },
+    { isGameOver: true, isWin: true },
+  ];
+  for (const s of allStates) {
+    if (canUseButton(s, 'restart') !== true) {
+      throw new Error(`restart should be true for ${JSON.stringify(s)}`);
+    }
+  }
+  // next: only true when isGameOver && isWin
+  if (canUseButton({ isGameOver: false, isWin: false }, 'next') !== false) {
+    throw new Error('next should be false when not game over');
+  }
+  if (canUseButton({ isGameOver: true, isWin: false }, 'next') !== false) {
+    throw new Error('next should be false when not won');
+  }
+  if (canUseButton({ isGameOver: true, isWin: true }, 'next') !== true) {
+    throw new Error('next should be true when won');
+  }
+  console.log('[logic] ok: canUseButton — restart always true, next only true when winning');
+  passed++;
+} catch (err) {
+  console.error(`[logic] FAIL: canUseButton — ${err.message}`);
+  failed++;
+}
+
+// 6. canUseButton() — unknown button returns false
+try {
+  const { canUseButton } = await import('../src/main.js');
+  if (canUseButton({ isGameOver: true, isWin: true }, 'unknown') !== false) {
+    throw new Error('unknown button should return false');
+  }
+  console.log('[logic] ok: canUseButton unknown button returns false');
+  passed++;
+} catch (err) {
+  console.error(`[logic] FAIL: canUseButton unknown — ${err.message}`);
   failed++;
 }
 

@@ -18,6 +18,17 @@ function nextDinoId() {
 }
 
 /**
+ * 判断按钮是否可用（纯函数，可独立测试）
+ * @param {Object} state - { isGameOver, isWin }
+ * @param {string} button - 'restart' | 'next'
+ */
+export function canUseButton(state, button) {
+  if (button === 'restart') return true;
+  if (button === 'next') return Boolean(state.isGameOver && state.isWin);
+  return false;
+}
+
+/**
  * 创建游戏实例
  */
 export function createGame() {
@@ -100,27 +111,31 @@ export function createGame() {
 
   // ---- 点击处理 ----
   function handleClick(x, y) {
-    if (state.isGameOver) {
-      // 游戏结束时点击棋盘无效，等待按钮
-      return;
-    }
-
+    // 1. 先做命中测试
     const info = renderer.hitTest(x, y);
     if (!info) return;
 
-    const { row, col, button } = info;
-
-    // ---- 按钮区域点击 ----
-    if (button === 'restart') {
+    // 2. 按钮处理（任何游戏状态都可点重启）
+    if (info.button === 'restart') {
       doRestartLevel();
       return;
     }
-    if (button === 'next') {
-      doNextLevel();
+
+    // 下一关：仅在通关后可用
+    if (info.button === 'next') {
+      if (state.isGameOver && state.isWin) {
+        doNextLevel();
+      }
       return;
     }
 
-    // ---- 棋盘格点击 ----
+    // 3. 游戏结束时，棋盘格点击无效
+    if (state.isGameOver) {
+      return;
+    }
+
+    // 4. 正常游戏状态处理棋盘格点击
+    const { row, col } = info;
     if (row === undefined || col === undefined) return;
 
     const cell = board.getCell(row, col);
@@ -229,20 +244,42 @@ export function createGame() {
     });
   }
 
-  // ---- 绑定点击事件 ----
+  // ---- 绑定点击/触摸事件 ----
   function bindCanvasEvents() {
     const canvas = renderer.getCanvas();
 
-    if (typeof wx !== 'undefined' && wx.onCanvasTouchStart) {
-      // 微信小游戏环境
-      wx.onCanvasTouchStart((res) => {
-        const touch = res.touches[0];
+    if (typeof wx !== 'undefined') {
+      // 微信小游戏环境：优先使用 wx.onTouchStart
+      if (typeof wx.onTouchStart === 'function') {
+        wx.onTouchStart((res) => {
+          const touch = res.touches && res.touches[0];
+          if (touch) {
+            const x = touch.clientX ?? touch.x;
+            const y = touch.clientY ?? touch.y;
+            handleClick(x, y);
+          }
+        });
+      } else if (typeof wx.onCanvasTouchStart === 'function') {
+        // 降级：wx.onCanvasTouchStart
+        wx.onCanvasTouchStart((res) => {
+          const touch = res.touches && res.touches[0];
+          if (touch) handleClick(touch.x, touch.y);
+        });
+      }
+    } else if (typeof document !== 'undefined' && canvas) {
+      // 浏览器环境：同时支持 touch 和 click
+      canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
         if (touch) {
-          handleClick(touch.x, touch.y);
+          const rect = canvas.getBoundingClientRect();
+          const scaleX = canvas.width / rect.width;
+          const scaleY = canvas.height / rect.height;
+          const x = (touch.clientX - rect.left) * scaleX;
+          const y = (touch.clientY - rect.top) * scaleY;
+          handleClick(x, y);
         }
-      });
-    } else if (typeof document !== 'undefined') {
-      // 浏览器环境
+      }, { passive: false });
       canvas.addEventListener('click', (e) => {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
@@ -266,7 +303,6 @@ export function createGame() {
 
   return {
     start,
-    // 暴露 handleClick 供外部（测试）调用
     _handleClick: handleClick,
   };
 }
