@@ -7,7 +7,7 @@
 feat/p0-mvp-bootstrap
 
 ## Latest Commit
-None（提交前）
+fa21d56
 
 ## Task Received
 修复 P0 工程骨架 import 路径并补充 smoke test。
