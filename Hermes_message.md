@@ -1,41 +1,34 @@
 # Hermes Message
 
 ## Last Updated
-2026-05-23 06:30:00
+2026-05-23 06:35:00
 
 ## Current Branch
 feat/p0-mvp-bootstrap
 
 ## Latest Commit
-30b0581
+None (pending commit)
 
 ## Task Received
-记录 P0 v0.1 手工验收结果：微信开发者工具成功运行，确认各项功能正常，控制台无致命报错。
+修复 P0 v0.1 两个小问题：attempts 统计逻辑、getSystemInfoSync API 黄色提示。
 
 ## Actions Taken
-- **手工验收（Win11 微信开发者工具）**：
-  - ✅ 微信开发者工具成功导入项目
-  - ✅ 游戏画面成功显示：渐变背景、标题「萌萌合成小恐龙」、第 1 关目标 Lv.2 × 1
-  - ✅ 3×3 棋盘可见，初始 3 只 Lv.1 恐龙圆形占位
-  - ✅ 底部「重开」「下一关」按钮可见
-  - ✅ 控制台无红色致命报错
-  - ✅ 控制台正常日志：`game_start`、`merge`、`game_over`、`level_complete`
-  - ⚠️ 仅有黄色 warning：`SharedArrayBuffer deprecation`（浏览器兼容性，非本项目问题）和 `getSystemInfoSync` API 提示，暂不阻塞 P0 验收
-- **已知需优化项**：
-  - `getSystemInfoSync` 兼容提示：renderer 在微信环境下使用，可能需要延迟初始化时机
-  - `attempts` 统计逻辑：通关时调用 `restart()` 会误增 attempts，需在 `checkWin()` 中直接 `attempts++` 而不调用 `levelModule.restart()`
+- **修复 attempts 统计**：`loadLevel(levelId, options)` 增加 `isRestart` 参数，`getNextAttempts(current, isRestart)` 纯函数替代 `levelModule.restart()` 误用；通关时不再调用 `restart()`；重开当前关 attempts+=1，进入下一关 attempts=1。
+- **新增导出 `getNextAttempts()` 纯函数**：可独立测试 attempts 计算逻辑。
+- **修复 getSystemInfoSync 提示**：renderer.init() 优先使用 `wx.getWindowInfo()`（新 API，无警告），降级使用 `wx.getSystemInfoSync()`；非微信环境保持 document.createElement fallback。
+- **更新 smoke-test.mjs**：新增 `getNextAttempts` 导出检查 + 4 项纯函数逻辑测试，总计 24/24 通过。
 
 ## Commands Run
 ```bash
-git status && git branch --show-current
-# On branch feat/p0-mvp-bootstrap, nothing to commit, working tree clean
+npm run check
+# [smoke] result: 24 passed, 0 failed
 ```
 
 ## Result
-✅ P0 v0.1 手工验收通过。项目可在微信开发者工具中正常运行，无致命错误。下一步可修复 attempts 统计逻辑和 getSystemInfoSync 兼容提示。
+✅ 完成。attempts 统计逻辑修正，getSystemInfoSync warning 消除，npm run check 24/24 通过。
 
 ## Errors / Blockers
-None（warning 不阻塞验收）。
+None。
 
 ## Next Needed
-修复 attempts 统计 bug（通关时 `levelModule.restart()` 会错误累加 attempts），可作为下次 ChatGPT 任务拆分的一部分。
+请用户把 Hermes_message.md 内容转发给 ChatGPT，并在微信开发者工具重新编译测试，确认 warning 消除且 attempts 日志正确。

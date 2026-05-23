@@ -29,6 +29,15 @@ export function canUseButton(state, button) {
 }
 
 /**
+ * 计算下次 attempts 值（纯函数，可独立测试）
+ * @param {number} currentAttempts
+ * @param {boolean} isRestart - true=重开当前关，false=首次进入/下一关
+ */
+export function getNextAttempts(currentAttempts, isRestart) {
+  return isRestart ? currentAttempts + 1 : 1;
+}
+
+/**
  * 创建游戏实例
  */
 export function createGame() {
@@ -64,7 +73,8 @@ export function createGame() {
   }
 
   // ---- 加载关卡 ----
-  function loadLevel(levelId) {
+  function loadLevel(levelId, options = {}) {
+    const { isRestart = false } = options;
     const cfg = getLevel(levelId);
     if (!cfg) return false;
 
@@ -72,7 +82,7 @@ export function createGame() {
     state.isGameOver = false;
     state.isWin = false;
     state.selectedCell = null;
-    state.attempts = 0;
+    state.attempts = getNextAttempts(state.attempts, isRestart);
 
     // 创建新棋盘
     board = new Board();
@@ -87,7 +97,7 @@ export function createGame() {
       dropOneDino(cfg);
     }
 
-    console.log(`[Game] Level ${levelId} loaded | board items: ${board.getAllItems().length}`);
+    console.log(`[Game] Level ${levelId} loaded | attempts: ${state.attempts} | board items: ${board.getAllItems().length}`);
     return true;
   }
 
@@ -198,7 +208,6 @@ export function createGame() {
     if (targetCount >= cfg.target.count) {
       state.isGameOver = true;
       state.isWin = true;
-      levelModule.restart(); // increment attempts on win
       Analytics.gameOver(state.currentLevelId, true, 'target_reached');
       Analytics.levelComplete(state.currentLevelId, state.attempts);
     }
@@ -215,7 +224,7 @@ export function createGame() {
 
   // ---- 重开当前关 ----
   function doRestartLevel() {
-    loadLevel(state.currentLevelId);
+    loadLevel(state.currentLevelId, { isRestart: true });
     render();
   }
 

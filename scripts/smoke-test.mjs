@@ -48,8 +48,14 @@ try {
   }
   console.log('[smoke] ok: canUseButton is a function');
   passed++;
+
+  if (typeof main.getNextAttempts !== 'function') {
+    throw new Error('getNextAttempts export is missing or not a function');
+  }
+  console.log('[smoke] ok: getNextAttempts is a function');
+  passed++;
 } catch (err) {
-  console.error(`[smoke] FAIL: createGame/canUseButton check — ${err.message}`);
+  console.error(`[smoke] FAIL: createGame/canUseButton/getNextAttempts check — ${err.message}`);
   failed++;
 }
 
@@ -163,6 +169,28 @@ try {
   passed++;
 } catch (err) {
   console.error(`[logic] FAIL: canUseButton unknown — ${err.message}`);
+  failed++;
+}
+
+// 7. getNextAttempts() — pure function for attempts tracking
+try {
+  const { getNextAttempts } = await import('../src/main.js');
+  if (getNextAttempts(0, false) !== 1) {
+    throw new Error('getNextAttempts(0, false) should be 1');
+  }
+  if (getNextAttempts(1, true) !== 2) {
+    throw new Error('getNextAttempts(1, true) should be 2');
+  }
+  if (getNextAttempts(2, true) !== 3) {
+    throw new Error('getNextAttempts(2, true) should be 3');
+  }
+  if (getNextAttempts(5, false) !== 1) {
+    throw new Error('getNextAttempts(5, false) should be 1');
+  }
+  console.log('[logic] ok: getNextAttempts — restart increments, new level resets to 1');
+  passed++;
+} catch (err) {
+  console.error(`[logic] FAIL: getNextAttempts — ${err.message}`);
   failed++;
 }
 

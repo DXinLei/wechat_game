@@ -17,9 +17,19 @@ export class Renderer {
   init() {
     if (typeof wx !== 'undefined') {
       this.canvas = wx.createCanvas();
-      const sysInfo = wx.getSystemInfoSync();
-      this.canvas.width = sysInfo.screenWidth;
-      this.canvas.height = sysInfo.screenHeight;
+      let width = 375;
+      let height = 667;
+      if (typeof wx.getWindowInfo === 'function') {
+        const windowInfo = wx.getWindowInfo();
+        width = windowInfo.windowWidth || windowInfo.screenWidth || width;
+        height = windowInfo.windowHeight || windowInfo.screenHeight || height;
+      } else if (typeof wx.getSystemInfoSync === 'function') {
+        const sysInfo = wx.getSystemInfoSync();
+        width = sysInfo.windowWidth || sysInfo.screenWidth || width;
+        height = sysInfo.windowHeight || sysInfo.screenHeight || height;
+      }
+      this.canvas.width = width;
+      this.canvas.height = height;
     } else {
       // 非微信环境，fallback 到固定尺寸
       this.canvas = document.createElement('canvas');
