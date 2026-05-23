@@ -73,6 +73,26 @@ export class Level {
   }
 
   /**
+   * 判断当前棋盘是否达成通关目标
+   * @param {Board} board - Board instance
+   * @param {Object} target - { level, count }
+   */
+  isTargetReached(board, target) {
+    if (!target) return false;
+    const items = board.getAllItems();
+    const count = items.filter(it => it.level >= target.level).length;
+    return count >= target.count;
+  }
+
+  /**
+   * 重置并重新加载当前关卡（返回新 levelCfg）
+   */
+  restartLevel() {
+    this.attempts++;
+    return this.getCurrentLevel();
+  }
+
+  /**
    * 保存当前关卡进度
    */
   saveProgress() {

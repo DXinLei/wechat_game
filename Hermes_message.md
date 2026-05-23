@@ -1,29 +1,29 @@
 # Hermes Message
 
 ## Last Updated
-2026-05-23 03:35:00
+2026-05-23 06:10:00
 
 ## Current Branch
 feat/p0-mvp-bootstrap
 
 ## Latest Commit
-fa21d56
+None (pending commit)
 
 ## Task Received
-修复 P0 工程骨架 import 路径并补充 smoke test。
+实现 P0 v0.1 可玩原型：3×3 合成玩法、点击式合成交互、完整游戏状态管理、棋盘初始化与掉落、通关/失败判断、基础按钮 UI。
 
 ## Actions Taken
-- 确认分支为 feat/p0-mvp-bootstrap（已是该分支）
-- 修复 src/main.js 中所有错误 import 路径：../ui/renderer.js → ./ui/renderer.js，../services/* → ./services/*，../core/* → ./core/*，../config/* → ./config/*
-- src/ 下其他文件（core/items.js、core/merge.js、core/level.js、services/adMock.js）中的 ../config/ 和 ../services/ 路径正确，无需修改
-- 创建 scripts/smoke-test.mjs：动态 import 所有 14 个核心模块 + 验证 createGame 导出
-- 更新 package.json：添加 "type": "module"，将 smoke test 集成到 check 脚本
-- 执行 npm run check：15 个模块全部通过 smoke test
+- **重构 src/main.js**：实现完整游戏状态（currentLevelId、board、selectedCell、isGameOver、isWin、coins、attempts），初始化 storage/analytics/renderer，加载第 1 关，根据 initialCount 和 dropRates 生成恐龙，实现点击式合成交互（选源格 → 选目标格 → 合成 → 掉落 → 判断），绑定 Canvas 点击/触摸事件，暴露 `_handleClick` 供测试调用。
+- **扩展 src/ui/renderer.js**：新增 `drawGame(state)` 渲染完整游戏画面（背景、标题、关卡信息、3×3 棋盘+恐龙圆形占位+等级文字、选中格高亮、按钮区域、通关/失败提示、操作提示），新增 `hitTest(x,y)` 点击命中测试，新增动态布局计算 `_calcLayout()` 适配微信屏幕尺寸（`wx.getSystemInfoSync()`），非微信环境 fallback 到 375×667。
+- **补充 src/core/level.js**：新增 `isTargetReached(board, target)` 判断通关、新增 `restartLevel()` 重开当前关。
+- **更新 scripts/smoke-test.mjs**：新增 4 项轻量逻辑检查（Board.hasMergeable、Board.isStuck、levels.length===30、Level 1 target 配置）。
+- **修复 smoke test bug**：isStuck 测试用 9 个不同等级（Lv.1~9）替代重复等级数组，避免 hasMergeable 误判。
+- **执行 npm run check**：19/19 通过，无错误。
 
 ## Commands Run
 ```bash
 git status && git branch --show-current
-# On branch feat/p0-mvp-bootstrap
+# On branch feat/p0-mvp-bootstrap，clean
 
 npm run check
 # [smoke] ok: ../src/main.js
@@ -41,11 +41,15 @@ npm run check
 # [smoke] ok: ../src/utils/random.js
 # [smoke] ok: ../src/utils/time.js
 # [smoke] ok: createGame is a function
-# [smoke] result: 15 passed, 0 failed
+# [logic] ok: Board.hasMergeable() true with two Lv.1 dinos
+# [logic] ok: Board.isStuck() true when full and no mergeable pairs
+# [logic] ok: levels.length === 30
+# [logic] ok: Level 1 target = Lv.2 × 1, initialCount = 3
+# [smoke] result: 19 passed, 0 failed
 ```
 
 ## Result
-✅ 完成。修复了 src/main.js 的 import 路径，添加了 smoke test（15/15 通过），package.json 已更新为 ESM。
+✅ 完成。已实现 P0 v0.1 可玩原型：点击式 3×3 合成、完整游戏状态管理、掉落逻辑、通关/失败判断、drawGame 渲染、底部按钮 UI。npm run check 19/19 通过。
 
 ## Errors / Blockers
 None。
