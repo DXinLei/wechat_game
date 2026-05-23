@@ -1,0 +1,10 @@
+{
+  "name": "wechat_game",
+  "version": "0.1.0",
+  "description": "萌萌合成小恐龙微信小游戏 MVP",
+  "private": true,
+  "scripts": {
+    "check": "node --check game.js && node --check src/main.js"
+  },
+  "devDependencies": {}
+}
