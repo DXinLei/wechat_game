@@ -2,13 +2,13 @@
  * 萌萌合成小恐龙 - 游戏主入口
  */
 
-import { Renderer } from '../ui/renderer.js';
-import { Storage } from '../services/storage.js';
-import { Analytics } from '../services/analytics.js';
-import { Board } from '../core/board.js';
-import { Level } from '../core/level.js';
-import { ITEMS } from '../core/items.js';
-import { gameConfig } from '../config/gameConfig.js';
+import { Renderer } from './ui/renderer.js';
+import { Storage } from './services/storage.js';
+import { Analytics } from './services/analytics.js';
+import { Board } from './core/board.js';
+import { Level } from './core/level.js';
+import { ITEMS } from './core/items.js';
+import { gameConfig } from './config/gameConfig.js';
 
 export function createGame() {
   let renderer = null;

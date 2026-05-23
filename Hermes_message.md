@@ -1,69 +1,54 @@
 # Hermes Message
 
 ## Last Updated
-2026-05-23 03:22:00
+2026-05-23 03:35:00
 
 ## Current Branch
 feat/p0-mvp-bootstrap
 
 ## Latest Commit
-86b3e10
+None（提交前）
 
 ## Task Received
-初始化微信小游戏 P0 工程骨架：创建开发分支 feat/p0-mvp-bootstrap，创建微信小游戏基础工程文件（game.js、game.json、project.config.json、package.json、README.md、.gitignore），创建源码目录结构（src/ 下的核心模块、配置、服务、UI、工具类），创建 assets 目录，自检（npm install + npm run check），更新 Hermes_message.md，提交并推送。
+修复 P0 工程骨架 import 路径并补充 smoke test。
 
 ## Actions Taken
-- 确认当前目录为 /opt/data/wechat_game
-- 执行 git checkout -b feat/p0-mvp-bootstrap 切换到开发分支
-- 创建工程文件：
-  - .gitignore
-  - README.md
-  - package.json
-  - game.js（小游戏入口）
-  - game.json（小游戏配置）
-  - project.config.json（开发者工具配置，appid 为测试值）
-- 创建源码目录结构：
-  - src/main.js（游戏主入口）
-  - src/config/levels.js（30关配置）
-  - src/config/gameConfig.js（全局配置）
-  - src/core/board.js（棋盘数据结构）
-  - src/core/merge.js（合成规则）
-  - src/core/level.js（关卡状态）
-  - src/core/items.js（道具接口）
-  - src/services/storage.js（存储服务）
-  - src/services/adMock.js（广告Mock）
-  - src/services/analytics.js（埋点Mock）
-  - src/ui/renderer.js（Canvas渲染）
-  - src/ui/panels.js（UI面板占位）
-  - src/utils/random.js（seed随机）
-  - src/utils/time.js（日期工具）
-  - assets/.gitkeep
-  - assets/images/.gitkeep
-  - assets/audio/.gitkeep
-- 自检：npm install ✅，npm run check ✅（语法检查通过）
-- docs/PRD.md 和 images/ 均未改动
+- 确认分支为 feat/p0-mvp-bootstrap（已是该分支）
+- 修复 src/main.js 中所有错误 import 路径：../ui/renderer.js → ./ui/renderer.js，../services/* → ./services/*，../core/* → ./core/*，../config/* → ./config/*
+- src/ 下其他文件（core/items.js、core/merge.js、core/level.js、services/adMock.js）中的 ../config/ 和 ../services/ 路径正确，无需修改
+- 创建 scripts/smoke-test.mjs：动态 import 所有 14 个核心模块 + 验证 createGame 导出
+- 更新 package.json：添加 "type": "module"，将 smoke test 集成到 check 脚本
+- 执行 npm run check：15 个模块全部通过 smoke test
 
 ## Commands Run
 ```bash
-git checkout -b feat/p0-mvp-bootstrap
-# 创建所有文件...
-
-npm install
-# up to date, audited 1 package, 0 vulnerabilities
+git status && git branch --show-current
+# On branch feat/p0-mvp-bootstrap
 
 npm run check
-# node --check game.js && node --check src/main.js
-# 退出码 0，语法检查通过
-
-git status
-find . -maxdepth 3 -type f | grep -v ".git/" | sort
+# [smoke] ok: ../src/main.js
+# [smoke] ok: ../src/config/levels.js
+# [smoke] ok: ../src/config/gameConfig.js
+# [smoke] ok: ../src/core/board.js
+# [smoke] ok: ../src/core/merge.js
+# [smoke] ok: ../src/core/level.js
+# [smoke] ok: ../src/core/items.js
+# [smoke] ok: ../src/services/storage.js
+# [smoke] ok: ../src/services/adMock.js
+# [smoke] ok: ../src/services/analytics.js
+# [smoke] ok: ../src/ui/renderer.js
+# [smoke] ok: ../src/ui/panels.js
+# [smoke] ok: ../src/utils/random.js
+# [smoke] ok: ../src/utils/time.js
+# [smoke] ok: createGame is a function
+# [smoke] result: 15 passed, 0 failed
 ```
 
-Result
-✅ 完成。所有文件已创建，语法检查通过。docs/ 和 images/ 未改动。
+## Result
+✅ 完成。修复了 src/main.js 的 import 路径，添加了 smoke test（15/15 通过），package.json 已更新为 ESM。
 
-Errors / Blockers
+## Errors / Blockers
 None。
 
-Next Needed
-请把 Hermes_message.md 内容转发给 ChatGPT，并提醒 ChatGPT 审阅 feat/p0-mvp-bootstrap 分支。
+## Next Needed
+请把 Hermes_message.md 内容转发给 ChatGPT，并提醒 ChatGPT 继续审阅 feat/p0-mvp-bootstrap 分支。
