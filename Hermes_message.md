@@ -1,42 +1,41 @@
 # Hermes Message
 
 ## Last Updated
-2026-05-23 06:22:00
+2026-05-23 06:30:00
 
 ## Current Branch
 feat/p0-mvp-bootstrap
 
 ## Latest Commit
-95f1460
+30b0581
 
 ## Task Received
-P0 v0.1 本地运行验证准备：检查微信小游戏配置、创建运行说明、创建验收清单。
+记录 P0 v0.1 手工验收结果：微信开发者工具成功运行，确认各项功能正常，控制台无致命报错。
 
 ## Actions Taken
-- 执行 `npm run check`：22/22 通过，无阻塞。
-- 检查配置文件：`game.json`、`project.config.json`（compileType=game, appid=touristappid）齐全正确。
-- 检查广告：源码中无真实广告 ID，adMock 开关为 true。
-- 检查约束：`docs/PRD.md` 未改动，`images/` 未改动。
-- 新建 `docs/RUNBOOK.md`：含微信开发者工具导入步骤、运行预期效果、基础玩法测试说明、已知局限性。
-- 新建 `docs/P0_ACCEPTANCE.md`：含环境检查、启动检查、合成交互检查、按钮逻辑检查、回归检查，共 20 项验收条目。
+- **手工验收（Win11 微信开发者工具）**：
+  - ✅ 微信开发者工具成功导入项目
+  - ✅ 游戏画面成功显示：渐变背景、标题「萌萌合成小恐龙」、第 1 关目标 Lv.2 × 1
+  - ✅ 3×3 棋盘可见，初始 3 只 Lv.1 恐龙圆形占位
+  - ✅ 底部「重开」「下一关」按钮可见
+  - ✅ 控制台无红色致命报错
+  - ✅ 控制台正常日志：`game_start`、`merge`、`game_over`、`level_complete`
+  - ⚠️ 仅有黄色 warning：`SharedArrayBuffer deprecation`（浏览器兼容性，非本项目问题）和 `getSystemInfoSync` API 提示，暂不阻塞 P0 验收
+- **已知需优化项**：
+  - `getSystemInfoSync` 兼容提示：renderer 在微信环境下使用，可能需要延迟初始化时机
+  - `attempts` 统计逻辑：通关时调用 `restart()` 会误增 attempts，需在 `checkWin()` 中直接 `attempts++` 而不调用 `levelModule.restart()`
 
 ## Commands Run
 ```bash
-npm run check
-# [smoke] result: 22 passed, 0 failed
-
-cat game.json
-# {"deviceOrientation":"portrait","showStatusBar":false,...}
-
-cat project.config.json
-# compileType: "game", appid: "touristappid"
+git status && git branch --show-current
+# On branch feat/p0-mvp-bootstrap, nothing to commit, working tree clean
 ```
 
 ## Result
-✅ 完成。微信小游戏配置检查通过，运行说明和验收清单已创建，无 blocker。
+✅ P0 v0.1 手工验收通过。项目可在微信开发者工具中正常运行，无致命错误。下一步可修复 attempts 统计逻辑和 getSystemInfoSync 兼容提示。
 
 ## Errors / Blockers
-None。
+None（warning 不阻塞验收）。
 
 ## Next Needed
-请用户把 Hermes_message.md 内容转发给 ChatGPT，并使用微信开发者工具打开项目，按 docs/P0_ACCEPTANCE.md 做手工验收。
+修复 attempts 统计 bug（通关时 `levelModule.restart()` 会错误累加 attempts），可作为下次 ChatGPT 任务拆分的一部分。
