@@ -1,22 +1,25 @@
 # Hermes Message
 
 ## Last Updated
-2026-05-23 06:35:00
+2026-05-23 06:38:00
 
 ## Current Branch
 feat/p0-mvp-bootstrap
 
 ## Latest Commit
-b8d1767
+3e267aa
 
 ## Task Received
-修复 P0 v0.1 两个小问题：attempts 统计逻辑、getSystemInfoSync API 黄色提示。
+等待 Win11 微信开发者工具复测：验证 getSystemInfoSync warning 是否消除、attempts 统计是否正确。
 
 ## Actions Taken
-- **修复 attempts 统计**：`loadLevel(levelId, options)` 增加 `isRestart` 参数，`getNextAttempts(current, isRestart)` 纯函数替代 `levelModule.restart()` 误用；通关时不再调用 `restart()`；重开当前关 attempts+=1，进入下一关 attempts=1。
-- **新增导出 `getNextAttempts()` 纯函数**：可独立测试 attempts 计算逻辑。
-- **修复 getSystemInfoSync 提示**：renderer.init() 优先使用 `wx.getWindowInfo()`（新 API，无警告），降级使用 `wx.getSystemInfoSync()`；非微信环境保持 document.createElement fallback。
-- **更新 smoke-test.mjs**：新增 `getNextAttempts` 导出检查 + 4 项纯函数逻辑测试，总计 24/24 通过。
+- **第 7 轮修复内容**：
+  - 修复 attempts 统计：`loadLevel(levelId, options)` 增加 `isRestart` 参数，`getNextAttempts()` 纯函数替换误用的 `levelModule.restart()`
+  - 修复 getSystemInfoSync warning：优先 `wx.getWindowInfo()`，降级 `getSystemInfoSync()`
+  - 新增 `getNextAttempts` 纯函数导出，smoke test 新增 4 项测试，24/24 通过
+- **第 6 轮：运行验证准备** - docs/RUNBOOK.md、docs/P0_ACCEPTANCE.md 已创建
+- **第 5 轮：交互修复** - 按钮层级、点击流程、触摸事件兼容性
+- **第 4 轮：P0 v0.1 实现** - 3×3 合成原型完成
 
 ## Commands Run
 ```bash
@@ -25,10 +28,15 @@ npm run check
 ```
 
 ## Result
-✅ 完成。attempts 统计逻辑修正，getSystemInfoSync warning 消除，npm run check 24/24 通过。
+⏳ 等待用户在 Win11 微信开发者工具中复测：getSystemInfoSync warning、attempts 日志。
 
 ## Errors / Blockers
-None。
+None（待复测确认）。
 
 ## Next Needed
-请用户把 Hermes_message.md 内容转发给 ChatGPT，并在微信开发者工具重新编译测试，确认 warning 消除且 attempts 日志正确。
+等待用户反馈：
+1. 控制台是否还出现 getSystemInfoSync 黄色提示
+2. 第 1 关首次进入日志 attempts 是否为 1
+3. 点击「重开」后 attempts 是否递增为 2
+4. 通关后 level_complete 上报的 attempts 是否正确
+5. 游戏仍能正常启动、合成、通关、进入下一关
